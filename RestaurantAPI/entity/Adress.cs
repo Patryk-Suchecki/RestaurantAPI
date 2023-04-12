@@ -8,5 +8,6 @@
         public string PostalCode { get; set; }
 
         public virtual Restaurant Restaurant { get; set; }
+        public virtual Transaction Transaction { get; set; }
     }
 }

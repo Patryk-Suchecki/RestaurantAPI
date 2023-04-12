@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RestaurantAPI.entity;
 
@@ -11,9 +12,10 @@ using RestaurantAPI.entity;
 namespace RestaurantAPI.Migrations
 {
     [DbContext(typeof(RestaurantDbContext))]
-    partial class RestaurantDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230404155542_TransactionAndManagerAdd")]
+    partial class TransactionAndManagerAdd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -69,9 +71,14 @@ namespace RestaurantAPI.Migrations
                     b.Property<int>("RestaurantId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("TransactionId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("RestaurantId");
+
+                    b.HasIndex("TransactionId");
 
                     b.ToTable("Dishes");
                 });
@@ -171,9 +178,6 @@ namespace RestaurantAPI.Migrations
                     b.Property<int>("AdressId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
@@ -185,8 +189,7 @@ namespace RestaurantAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AdressId")
-                        .IsUnique();
+                    b.HasIndex("AdressId");
 
                     b.HasIndex("RestaurantId");
 
@@ -240,6 +243,10 @@ namespace RestaurantAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("RestaurantAPI.entity.Transaction", null)
+                        .WithMany("orderedDishes")
+                        .HasForeignKey("TransactionId");
+
                     b.Navigation("Restaurant");
                 });
 
@@ -282,8 +289,8 @@ namespace RestaurantAPI.Migrations
             modelBuilder.Entity("RestaurantAPI.entity.Transaction", b =>
                 {
                     b.HasOne("RestaurantAPI.entity.Adress", "Adress")
-                        .WithOne("Transaction")
-                        .HasForeignKey("RestaurantAPI.entity.Transaction", "AdressId")
+                        .WithMany()
+                        .HasForeignKey("AdressId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -320,13 +327,16 @@ namespace RestaurantAPI.Migrations
             modelBuilder.Entity("RestaurantAPI.entity.Adress", b =>
                 {
                     b.Navigation("Restaurant");
-
-                    b.Navigation("Transaction");
                 });
 
             modelBuilder.Entity("RestaurantAPI.entity.Restaurant", b =>
                 {
                     b.Navigation("Dishes");
+                });
+
+            modelBuilder.Entity("RestaurantAPI.entity.Transaction", b =>
+                {
+                    b.Navigation("orderedDishes");
                 });
 #pragma warning restore 612, 618
         }
