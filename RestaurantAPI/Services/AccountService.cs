@@ -17,6 +17,7 @@ namespace RestaurantAPI.Services
     {
         void RegisterUser(RegisterUserDto dto);
         string GenerateJwt(LoginDto dto);
+        Task VerifyEmail(string email);
     }
 
     public class AccountService : IAccountService
@@ -24,12 +25,14 @@ namespace RestaurantAPI.Services
         private readonly RestaurantDbContext _dbContext;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly AuthenticationSettings _authenticationSettings;
+        private readonly IEmailSender _emailSender;
 
-        public AccountService(RestaurantDbContext dbContext, IPasswordHasher<User> passwordHasher, AuthenticationSettings authenticationSettings)
+        public AccountService(RestaurantDbContext dbContext, IPasswordHasher<User> passwordHasher, AuthenticationSettings authenticationSettings, IEmailSender emailSender)
         {
             _dbContext = dbContext;
             _passwordHasher = passwordHasher;
             _authenticationSettings = authenticationSettings;
+            _emailSender = emailSender;
         }
         public void RegisterUser(RegisterUserDto dto)
         {
@@ -79,6 +82,14 @@ namespace RestaurantAPI.Services
                 signingCredentials: cred);
             var tokenHandler = new JwtSecurityTokenHandler();
             return tokenHandler.WriteToken(token);
+        }
+        public async Task VerifyEmail(string email)
+        {
+            string verificationLink = "https://example.com/verify?email=" + email + "&code=123456";
+
+            string subject = "Weryfikacja adresu email";
+            string body = "Kliknij w poniższy link, aby zweryfikować swój adres email: " + verificationLink;
+            await _emailSender.SendEmailAsync(email, subject, body);
         }
     }
 }

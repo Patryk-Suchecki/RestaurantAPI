@@ -25,7 +25,11 @@ builder.Host.UseNLog();
 var authenticationSettings = new AuthenticationSettings();
 builder.Configuration.GetSection("Authentication").Bind(authenticationSettings);
 
+var emailSettings = new EmailSettings();
+builder.Configuration.GetSection("EmailSettings").Bind(emailSettings);
+
 builder.Services.AddSingleton(authenticationSettings);
+builder.Services.AddSingleton(emailSettings);
 builder.Services.AddAuthentication(option =>
 {
     option.DefaultAuthenticateScheme = "Bearer";
@@ -45,6 +49,7 @@ builder.Services.AddAuthentication(option =>
 builder.Services.AddScoped<IAuthorizationHandler, ResourceOperationRequirementHandler>();
 builder.Services.AddControllers().AddFluentValidation();
 builder.Services.AddDbContext<RestaurantDbContext>();
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddScoped<RestaurantSeeder>();
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 builder.Services.AddScoped<IRestaurantService, RestaurantService>();
