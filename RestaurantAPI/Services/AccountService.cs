@@ -17,7 +17,7 @@ namespace RestaurantAPI.Services
     {
         void RegisterUser(RegisterUserDto dto);
         string GenerateJwt(LoginDto dto);
-        Task VerifyEmail(string email);
+        void VerifyEmail(string email, int? code);
     }
 
     public class AccountService : IAccountService
@@ -83,13 +83,13 @@ namespace RestaurantAPI.Services
             var tokenHandler = new JwtSecurityTokenHandler();
             return tokenHandler.WriteToken(token);
         }
-        public async Task VerifyEmail(string email)
+        public void VerifyEmail(string email, int? code)
         {
             string verificationLink = "https://example.com/verify?email=" + email + "&code=123456";
 
             string subject = "Weryfikacja adresu email";
             string body = "Kliknij w poniższy link, aby zweryfikować swój adres email: " + verificationLink;
-            await _emailSender.SendEmailAsync(email, subject, body);
+            _emailSender.SendEmailAsync(email, subject, body);
         }
     }
 }

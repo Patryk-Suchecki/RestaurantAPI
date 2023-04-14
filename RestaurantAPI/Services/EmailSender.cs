@@ -1,11 +1,12 @@
-﻿using System.Net.Mail;
-using System.Net;
+﻿using MailKit.Net.Smtp;
+using MailKit.Security;
+using MimeKit;
 
 namespace RestaurantAPI.Services
 {
     public interface IEmailSender
     {
-        Task SendEmailAsync(string to, string subject, string body);
+        void SendEmailAsync(string to, string subject, string body);
     }
 
     public class EmailSender : IEmailSender
@@ -17,26 +18,26 @@ namespace RestaurantAPI.Services
             _emailSettings = emailSettings;
         }
 
-        public async Task SendEmailAsync(string to, string subject, string body)
+        public void SendEmailAsync(string to, string subject, string body)
         {
             try
             {
-                using (var smtpClient = new SmtpClient())
-                {
-                    smtpClient.Host = _emailSettings.Host;
-                    smtpClient.Port = _emailSettings.Port;
-                    smtpClient.EnableSsl = _emailSettings.EnableSsl;
-                    smtpClient.UseDefaultCredentials = false;
-                    smtpClient.Credentials = new NetworkCredential(_emailSettings.Username, _emailSettings.Password);
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress(_emailSettings.From, _emailSettings.From));
+                message.To.Add(new MailboxAddress(to, to));
+                message.Subject = subject;
 
-                    using (var mailMessage = new MailMessage())
-                    {
-                        mailMessage.From = new MailAddress(_emailSettings.From);
-                        mailMessage.To.Add(to);
-                        mailMessage.Subject = subject;
-                        mailMessage.Body = body;
-                        await smtpClient.SendMailAsync(mailMessage);
-                    }
+                var builder = new BodyBuilder();
+                builder.HtmlBody = body;
+                message.Body = builder.ToMessageBody();
+
+                using (var client = new SmtpClient())
+                {
+                    client.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                    client.Connect(_emailSettings.Host, _emailSettings.Port, SecureSocketOptions.StartTls);
+                    client.Authenticate(_emailSettings.Username, _emailSettings.Password);
+                    client.Send(message);
+                    client.Disconnect(true);
                 }
             }
             catch (Exception ex)

@@ -23,7 +23,7 @@ namespace RestaurantAPI.Controllers
             _restaurantService = restaurantService;
         }
         [HttpDelete("{id}")]
-        public ActionResult Delete([FromRoute]int id)
+        public ActionResult Delete([FromRoute] int id)
         {
             _restaurantService.Delete(id);
             return NoContent();
@@ -35,7 +35,7 @@ namespace RestaurantAPI.Controllers
             return Ok();
         }
         [HttpPost]
-        public ActionResult CreateRestaurant([FromBody]CreateRestaurantDto dto)
+        public ActionResult CreateRestaurant([FromBody] CreateRestaurantDto dto)
         {
             var id = _restaurantService.Create(dto);
 
@@ -43,7 +43,7 @@ namespace RestaurantAPI.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<RestaurantDto>> GetAll([FromQuery]RestaurantQuery query)
+        public ActionResult<IEnumerable<RestaurantDto>> GetAll([FromQuery] RestaurantQuery query)
         {
             var restaurantsDtos = _restaurantService.GetAll(query);
             return Ok(restaurantsDtos);
@@ -51,10 +51,17 @@ namespace RestaurantAPI.Controllers
         }
 
         [HttpGet("{restaurantId}")]
-        public ActionResult<RestaurantDto> Get([FromRoute]int restaurantId)
+        public ActionResult<RestaurantDto> Get([FromRoute] int restaurantId)
         {
             var result = _restaurantService.GetById(restaurantId);
             return Ok(result);
+        }
+
+        [HttpPost("setlogo/{id}")]
+        public ActionResult Upload([FromForm] IFormFile logo, [FromRoute]int id)
+        {
+            _restaurantService.SetLogo(logo, id);
+            return Ok();
         }
     }
 }

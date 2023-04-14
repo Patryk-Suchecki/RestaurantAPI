@@ -33,6 +33,16 @@ namespace RestaurantAPI.Middleware
                 context.Response.StatusCode = 404;
                 await context.Response.WriteAsync(notFoundException.Message);
             }
+            catch (BadFileExtension badFileExtension)
+            {
+                context.Response.StatusCode = 400;
+                await context.Response.WriteAsync(badFileExtension.Message);
+            }
+            catch (FileSizeException fileSizeException)
+            {
+                context.Response.StatusCode = 400;
+                await context.Response.WriteAsync(fileSizeException.Message);
+            }
             catch (Exception e)
             {
                 _logger.LogError(e, e.Message);

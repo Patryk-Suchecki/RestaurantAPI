@@ -27,10 +27,10 @@ namespace RestaurantAPI.Controllers
             string token = _accountService.GenerateJwt(dto);
             return Ok(token);
         }
-        [HttpGet("verify/{email}")]
-        public ActionResult Verify([FromRoute] string email)
+        [HttpGet("verify")]
+        public ActionResult Verify([FromQuery] string email, int? code)
         {
-            _accountService.VerifyEmail(email);
+            _accountService.VerifyEmail(email, code);
             return Ok();
         }
     }

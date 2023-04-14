@@ -1,17 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Xml.Linq;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using RestaurantAPI.entity;
 using RestaurantAPI.Models;
 using RestaurantAPI.Exceptions;
 using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
 using RestaurantAPI.Authorization;
 using System.Linq.Expressions;
-using System;
+using RestaurantAPI.Models.Validators;
 
 namespace RestaurantAPI.Services
 {
@@ -22,6 +17,7 @@ namespace RestaurantAPI.Services
         RestaurantDto GetById(int id);
         void Delete(int id);
         void Update(int id, UpdateRestaurantDto dto);
+        void SetLogo(IFormFile file, int id);
 
     }
     public class RestaurantService : IRestaurantService
@@ -142,6 +138,29 @@ namespace RestaurantAPI.Services
             _dbContext.SaveChanges();
 
             return restaurant.Id;
+        }
+        public void SetLogo(IFormFile logo, int id)
+        {
+            var restaurant = _dbContext
+                .Restaurants
+                .FirstOrDefault(r => r.Id == id);
+
+            if (restaurant is null)
+            {
+                throw new NotFoundException("Restaurant not found");
+            }
+            string[] allowedFileExtensions = { ".png" };
+            FileValidator.ValidateFile(logo, 100000, allowedFileExtensions);
+
+            string fileExtension = Path.GetExtension(logo.FileName);
+            var rootPath = Directory.GetCurrentDirectory();
+            var fileName = $"logo{fileExtension}";
+            Directory.CreateDirectory($"{rootPath}/wwwroot/images/restaurants/{restaurant.Name}");
+            var fullPath = $"{rootPath}/wwwroot/images/restaurants/{restaurant.Name}/{fileName}";
+            using (var stream = new FileStream(fullPath, FileMode.Create))
+            {
+                logo.CopyTo(stream);
+            }
         }
     }
 }
