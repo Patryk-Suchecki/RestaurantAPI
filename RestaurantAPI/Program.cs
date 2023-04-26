@@ -14,8 +14,9 @@ using RestaurantAPI;
 using AutoMapper;
 using FluentValidation.AspNetCore;
 using System.Reflection;
+using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder();
+var builder = WebApplication.CreateBuilder(args);
 // NLOG
 builder.Logging.ClearProviders();
 builder.Logging.SetMinimumLevel(LogLevel.Trace);
@@ -48,7 +49,6 @@ builder.Services.AddAuthentication(option =>
 });
 builder.Services.AddScoped<IAuthorizationHandler, ResourceOperationRequirementHandler>();
 builder.Services.AddControllers().AddFluentValidation();
-builder.Services.AddDbContext<RestaurantDbContext>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddScoped<RestaurantSeeder>();
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
@@ -64,6 +64,7 @@ builder.Services.AddScoped<RequestTimeMiddleware>();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSignalR();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontEndClient", policyBuilder =>
@@ -72,7 +73,8 @@ builder.Services.AddCors(options =>
             .WithOrigins(builder.Configuration["AllowedOrigins"])
             );
 });
-
+builder.Services.AddDbContext<RestaurantDbContext>
+    (options => options.UseSqlServer(builder.Configuration.GetConnectionString("RestaurantDbConnection")));
 //configure
 
 var app = builder.Build();
@@ -108,3 +110,6 @@ app.UseEndpoints(endpoints =>
 });
 
 app.Run();
+
+public partial class Program 
+{ }
