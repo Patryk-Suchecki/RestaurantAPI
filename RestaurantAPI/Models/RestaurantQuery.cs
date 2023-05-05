@@ -7,5 +7,7 @@
         public int PageSize { get; set; }
         public string SortBy { get; set; }
         public SortDirection sortDirection { get; set; }
+        public AdressDto adressDto { get; set; }
+
     }
 }

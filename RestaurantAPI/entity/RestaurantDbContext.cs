@@ -35,6 +35,10 @@ namespace RestaurantAPI.entity
                 .Property(d => d.Name)
                 .IsRequired();
 
+            modelBuilder.Entity<Dish>()
+                .Property(d => d.Price)
+                .HasPrecision(18, 2);
+
             modelBuilder.Entity<Adress>()
                 .Property(a => a.City)
                 .IsRequired()
@@ -50,6 +54,10 @@ namespace RestaurantAPI.entity
                  .WithMany()
                  .HasForeignKey(t => t.RestaurantId)
                  .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Transaction>()
+                .Property(t => t.Price)
+                .HasPrecision(18, 2);
 
         }
     }

@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Authorization;
 using RestaurantAPI.Authorization;
 using System.Linq.Expressions;
 using RestaurantAPI.Models.Validators;
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using System.Linq;
 
 namespace RestaurantAPI.Services
 {
@@ -27,15 +30,19 @@ namespace RestaurantAPI.Services
         private readonly ILogger _logger;
         private readonly IAuthorizationService _authorizationService;
         private readonly IUserContextService _userContextService;
+        private readonly DistanceCalculator _distanceCalculator;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public RestaurantService(RestaurantDbContext dbContext, IMapper mapper, ILogger<RestaurantService> logger
-            , IAuthorizationService authorizationService, IUserContextService userContextService)
+            , IAuthorizationService authorizationService, IUserContextService userContextService, DistanceCalculator distanceCalculator, IHttpContextAccessor httpContextAccessor)
         {
             _dbContext = dbContext;
             _mapper = mapper;
             _logger = logger;
             _authorizationService = authorizationService;
             _userContextService = userContextService;
+            _distanceCalculator = distanceCalculator;
+            _httpContextAccessor = httpContextAccessor;
         }
         public void Delete(int id)
         {
@@ -73,7 +80,7 @@ namespace RestaurantAPI.Services
 
             restaurant.Name = dto.Name;
             restaurant.Description = dto.Description;
-            restaurant.HasDelivery = dto.HasDelivery;
+            restaurant.DeliveryDistance = dto.DeliveryDistance;
 
             _dbContext.SaveChanges();
         }
@@ -96,12 +103,14 @@ namespace RestaurantAPI.Services
 
         public PagedResult<RestaurantDto> GetAll(RestaurantQuery query)
         {
+            var userAdressJson = JsonConvert.SerializeObject(query.adressDto);
+            _httpContextAccessor.HttpContext.Session.SetString("AdressDto", userAdressJson);
+
             var baseQuery = _dbContext
                 .Restaurants
                 .Include(r => r.Adress)
                 .Include(r => r.Dishes)
-                .Where(r => query.SearchPhrase == null || (r.Name.ToLower().Contains(query.SearchPhrase.ToLower())
-                                                        || r.Description.ToLower().Contains(query.SearchPhrase.ToLower())));
+                .Where(r => query.SearchPhrase == null || (r.Name.ToLower().Contains(query.SearchPhrase.ToLower()) || r.Description.ToLower().Contains(query.SearchPhrase.ToLower())));
 
             if (!string.IsNullOrEmpty(query.SortBy))
             {
@@ -117,6 +126,16 @@ namespace RestaurantAPI.Services
                     baseQuery.OrderBy(selectedColumn) : baseQuery.OrderByDescending(selectedColumn);
             }
 
+            var distances = new List<int>();
+            foreach (var restaurant in baseQuery)
+            {
+                var restaurantAdress = restaurant.Adress;
+                var distance = _distanceCalculator.CalculateDistance(userAdressJson, JsonConvert.SerializeObject(restaurantAdress));
+
+                if (distance <= restaurant.DeliveryDistance * 1000) distances.Add(distance);
+
+                else baseQuery = baseQuery.Where(r => r != restaurant);
+            }
             var restaurants = baseQuery
                 .Skip(query.PageSize * (query.PageNumber -1))
                 .Take(query.PageSize)
@@ -126,7 +145,7 @@ namespace RestaurantAPI.Services
 
             var restaurantsDtos = _mapper.Map<List<RestaurantDto>>(restaurants);
 
-            var result = new PagedResult<RestaurantDto>(restaurantsDtos, totalItemsCount, query.PageSize, query.PageNumber);
+            var result = new PagedResult<RestaurantDto>(restaurantsDtos, totalItemsCount, query.PageSize, query.PageNumber, distances);
             return result;
         }
 

@@ -1,4 +1,7 @@
-﻿namespace RestaurantAPI.entity
+﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
+
+namespace RestaurantAPI.entity
 {
     public class Adress
     {
@@ -6,7 +9,8 @@
         public string City { get; set; }
         public string Street { get; set; }
         public string PostalCode { get; set; }
-
+        [JsonIgnore]
+        [IgnoreDataMember]
         public virtual Restaurant Restaurant { get; set; }
         public virtual Transaction Transaction { get; set; }
     }

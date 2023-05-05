@@ -59,7 +59,7 @@ namespace RestaurantAPI
                     Category = "Fast Food",
                     Description = "KFC",
                     ContactEmail = "contact@kfc.com",
-                    HasDelivery = true,
+                    DeliveryDistance = 50,
                     Dishes = new List<Dish>()
                     {
                        new Dish()

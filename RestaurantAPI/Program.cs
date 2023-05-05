@@ -15,6 +15,7 @@ using AutoMapper;
 using FluentValidation.AspNetCore;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 // NLOG
@@ -48,6 +49,17 @@ builder.Services.AddAuthentication(option =>
     };
 });
 builder.Services.AddScoped<IAuthorizationHandler, ResourceOperationRequirementHandler>();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+});
+// do usuniêcia
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+    });
 builder.Services.AddControllers().AddFluentValidation();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddScoped<RestaurantSeeder>();
@@ -62,6 +74,7 @@ builder.Services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator
 builder.Services.AddScoped<IValidator<RestaurantQuery>, RestaurantQueryValidator>();
 builder.Services.AddScoped<RequestTimeMiddleware>();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
+builder.Services.AddSingleton<DistanceCalculator>(new DistanceCalculator(builder.Configuration["GoogleMapsApiKey"]));
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
@@ -102,6 +115,7 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseRouting();
+app.UseSession();
 app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>

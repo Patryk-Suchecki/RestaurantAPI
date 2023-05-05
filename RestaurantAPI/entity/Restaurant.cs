@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-
-namespace RestaurantAPI.entity
+﻿namespace RestaurantAPI.entity
 {
     public class Restaurant
     {
@@ -9,7 +6,7 @@ namespace RestaurantAPI.entity
         public string Name { get; set; }
         public string Description { get; set; }
         public string Category { get; set; }
-        public bool HasDelivery { get; set; }
+        public int DeliveryDistance { get; set; }
         public string ContactEmail { get; set; }
         public string ContactNumber { get; set; }
 
@@ -17,6 +14,7 @@ namespace RestaurantAPI.entity
         public virtual User CreatedBy { get; set; }
 
         public int AdressId { get; set; }
+
         public virtual Adress Adress { get; set; }
 
         public virtual List<Dish> Dishes { get; set; }
