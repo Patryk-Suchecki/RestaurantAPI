@@ -54,7 +54,6 @@ builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
 });
-// do usuniêcia
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options =>
     {

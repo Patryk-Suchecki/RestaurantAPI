@@ -12,6 +12,7 @@ namespace RestaurantAPI.Models
         public string City { get; set; }
         public string Street { get; set; }
         public string PostalCode { get; set; }
+        public double? DeliveryPrice { get; set; }
 
         public List<DishDto> Dishes { get; set; }
     }

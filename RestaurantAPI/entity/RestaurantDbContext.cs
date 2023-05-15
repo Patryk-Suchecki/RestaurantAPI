@@ -31,34 +31,25 @@ namespace RestaurantAPI.entity
                 .IsRequired()
                 .HasMaxLength(25);
 
-            modelBuilder.Entity<Dish>()
-                .Property(d => d.Name)
-                .IsRequired();
+            modelBuilder.Entity<Dish>(eb =>
+            {
+                eb.Property(d => d.Price).HasPrecision(18, 2);
+                eb.Property(d => d.Name).IsRequired();
+            });
+                
 
-            modelBuilder.Entity<Dish>()
-                .Property(d => d.Price)
-                .HasPrecision(18, 2);
+            modelBuilder.Entity<Adress>(eb =>
+            {
+                eb.Property(a => a.City).IsRequired().HasMaxLength(50);
+                eb.Property(a => a.Street).IsRequired().HasMaxLength(50);
+            });
+                
 
-            modelBuilder.Entity<Adress>()
-                .Property(a => a.City)
-                .IsRequired()
-                .HasMaxLength(50);
-
-            modelBuilder.Entity<Adress>()
-                .Property(a => a.Street)
-                .IsRequired()
-                .HasMaxLength(50);
-
-            modelBuilder.Entity<Transaction>()
-                 .HasOne(t => t.Restaurant)
-                 .WithMany()
-                 .HasForeignKey(t => t.RestaurantId)
-                 .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<Transaction>()
-                .Property(t => t.Price)
-                .HasPrecision(18, 2);
-
+            modelBuilder.Entity<Transaction>(eb =>
+            {
+                eb.HasOne(t => t.Restaurant).WithMany().HasForeignKey(t => t.RestaurantId).OnDelete(DeleteBehavior.NoAction);
+                eb.Property(t => t.Price).HasPrecision(18, 2);
+            });
         }
     }
 }

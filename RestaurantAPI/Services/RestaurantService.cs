@@ -126,13 +126,15 @@ namespace RestaurantAPI.Services
                     baseQuery.OrderBy(selectedColumn) : baseQuery.OrderByDescending(selectedColumn);
             }
 
-            var distances = new List<int>();
             foreach (var restaurant in baseQuery)
             {
                 var restaurantAdress = restaurant.Adress;
                 var distance = _distanceCalculator.CalculateDistance(userAdressJson, JsonConvert.SerializeObject(restaurantAdress));
 
-                if (distance <= restaurant.DeliveryDistance * 1000) distances.Add(distance);
+                if (distance <= restaurant.DeliveryDistance * 1000)
+                {
+                    _httpContextAccessor.HttpContext.Session.SetInt32($"restaurant_{restaurant.Id}", distance);
+                }
 
                 else baseQuery = baseQuery.Where(r => r != restaurant);
             }
@@ -145,7 +147,7 @@ namespace RestaurantAPI.Services
 
             var restaurantsDtos = _mapper.Map<List<RestaurantDto>>(restaurants);
 
-            var result = new PagedResult<RestaurantDto>(restaurantsDtos, totalItemsCount, query.PageSize, query.PageNumber, distances);
+            var result = new PagedResult<RestaurantDto>(restaurantsDtos, totalItemsCount, query.PageSize, query.PageNumber);
             return result;
         }
 
