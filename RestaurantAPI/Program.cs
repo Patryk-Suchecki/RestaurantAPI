@@ -10,6 +10,7 @@ using RestaurantAPI.Middleware;
 using RestaurantAPI.Models.Validators;
 using RestaurantAPI.Models;
 using RestaurantAPI.Services;
+using RestaurantAPI.Controllers;
 using RestaurantAPI;
 using AutoMapper;
 using FluentValidation.AspNetCore;
@@ -121,6 +122,7 @@ app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
+    endpoints.MapHub<WebSocketHub>("/websocket");
 });
 
 app.Run();
