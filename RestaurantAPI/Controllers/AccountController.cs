@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RestaurantAPI.entity;
 using RestaurantAPI.Models;
 using RestaurantAPI.Services;
 
@@ -14,8 +15,15 @@ namespace RestaurantAPI.Controllers
         {
             _accountService = accountService;
         }
+        [HttpGet("statistics")]
+        public ActionResult Statistics([FromQuery]string email)
+        {
+            
+            var result = _accountService.UserStatistics(email);
+            return Ok(result);
+        }
         [HttpPost("register")]
-        public ActionResult RegisterUser([FromBody]RegisterUserDto dto)
+        public ActionResult RegisterUser([FromBody] RegisterUserDto dto)
         {
             _accountService.RegisterUser(dto);
             return Ok();

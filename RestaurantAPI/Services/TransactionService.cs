@@ -62,6 +62,12 @@ namespace RestaurantAPI.Services
             var transaction = _mapper.Map<Transaction>(dto);
             transaction.UserId = (int)_userContextService.GetUserId;
             transaction.Date = DateTime.UtcNow;
+            var user = _dbContext.Users
+            .FirstOrDefault(u => u.Id == transaction.UserId);
+            if (user != null) 
+            {
+                user.NumberOfOrders++;
+            }
             _dbContext.Transactions.Add(transaction);
             _dbContext.SaveChanges();
 

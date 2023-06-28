@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using AutoMapper;
 
 namespace RestaurantAPI.Services
 {
@@ -18,6 +19,7 @@ namespace RestaurantAPI.Services
         void RegisterUser(RegisterUserDto dto);
         string GenerateJwt(LoginDto dto);
         void VerifyEmail(string email, int? code);
+        UserStatisticsDto UserStatistics(string email);
     }
 
     public class AccountService : IAccountService
@@ -26,13 +28,29 @@ namespace RestaurantAPI.Services
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly AuthenticationSettings _authenticationSettings;
         private readonly IEmailSender _emailSender;
+        private readonly IMapper _mapper;
 
-        public AccountService(RestaurantDbContext dbContext, IPasswordHasher<User> passwordHasher, AuthenticationSettings authenticationSettings, IEmailSender emailSender)
+        public AccountService(RestaurantDbContext dbContext, IPasswordHasher<User> passwordHasher, AuthenticationSettings authenticationSettings, IEmailSender emailSender, IMapper mapper)
         {
             _dbContext = dbContext;
             _passwordHasher = passwordHasher;
             _authenticationSettings = authenticationSettings;
             _emailSender = emailSender;
+            _mapper = mapper;
+        }
+        public UserStatisticsDto UserStatistics(string email)
+        {
+            var user = _dbContext
+                .Users
+                .FirstOrDefault(u => u.Email == email);
+
+            if (user is null)
+            {
+                throw new NotFoundException("User not found");
+            }
+
+            var result = _mapper.Map<UserStatisticsDto>(user);
+            return result;
         }
         public void RegisterUser(RegisterUserDto dto)
         {
@@ -62,7 +80,8 @@ namespace RestaurantAPI.Services
             {
                 throw new BadRequestException("Invalid username or password");
             }
-
+            user.NumberOfLogins++;
+            _dbContext.SaveChanges();
             var claims = new List<Claim>() 
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
