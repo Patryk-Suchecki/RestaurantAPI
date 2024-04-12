@@ -171,7 +171,7 @@ namespace RestaurantAPI.Services
                 throw new NotFoundException("Restaurant not found");
             }
             string[] allowedFileExtensions = { ".png" };
-            FileValidator.ValidateFile(logo, 100000, allowedFileExtensions);
+            FileValidator.ValidateFile(logo, 1000000000, allowedFileExtensions);
 
             string fileExtension = Path.GetExtension(logo.FileName);
             var rootPath = Directory.GetCurrentDirectory();

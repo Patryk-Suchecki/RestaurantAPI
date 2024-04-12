@@ -78,13 +78,23 @@ builder.Services.AddSingleton<DistanceCalculator>(new DistanceCalculator(builder
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
-builder.Services.AddCors(options =>
+/*builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontEndClient", policyBuilder =>
         policyBuilder.AllowAnyMethod()
             .AllowAnyHeader()
             .WithOrigins(builder.Configuration["AllowedOrigins"])
             );
+});*/
+builder.Services.AddCors(options =>
+{
+    // this defines a CORS policy called "default"
+    options.AddPolicy("default", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
 });
 builder.Services.AddDbContext<RestaurantDbContext>
     (options => options.UseSqlServer(builder.Configuration.GetConnectionString("RestaurantDbConnection")));
@@ -97,7 +107,8 @@ seeder.Seed();
 
 app.UseResponseCaching();
 app.UseStaticFiles();
-app.UseCors("FrontEndClient");
+/*app.UseCors("FrontEndClient");*/
+app.UseCors("default");
 
 if (app.Environment.IsDevelopment())
 {
