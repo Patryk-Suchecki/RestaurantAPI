@@ -1,12 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
-using RestaurantAPI.entity;
+﻿using Microsoft.AspNetCore.Mvc;
 using RestaurantAPI.Models;
 using RestaurantAPI.Services;
 
