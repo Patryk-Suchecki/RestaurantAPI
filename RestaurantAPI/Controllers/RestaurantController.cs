@@ -42,18 +42,23 @@ namespace RestaurantAPI.Controllers
             return Created($"/api/restaurant/{id}", null);
         }
 
-        [HttpGet]
+        [HttpPost("all")]
         public ActionResult<IEnumerable<RestaurantDto>> GetAll([FromBody] RestaurantQuery query)
         {
             var restaurantsDtos = _restaurantService.GetAll(query);
             return Ok(restaurantsDtos);
-
         }
 
         [HttpGet("{restaurantId}")]
         public ActionResult<RestaurantDto> Get([FromRoute] int restaurantId)
         {
             var result = _restaurantService.GetById(restaurantId);
+            return Ok(result);
+        }
+        [HttpGet("own")]
+        public ActionResult<RestaurantDto> GetByOwner()
+        {
+            var result = _restaurantService.GetRestaurantsByOwner();
             return Ok(result);
         }
 

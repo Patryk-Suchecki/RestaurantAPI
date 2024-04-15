@@ -21,6 +21,7 @@ namespace RestaurantAPI.Services
         void Delete(int id);
         void Update(int id, UpdateRestaurantDto dto);
         void SetLogo(IFormFile file, int id);
+        List<Restaurant> GetRestaurantsByOwner();
 
     }
     public class RestaurantService : IRestaurantService
@@ -150,6 +151,17 @@ namespace RestaurantAPI.Services
             var result = new PagedResult<RestaurantDto>(restaurantsDtos, totalItemsCount, query.PageSize, query.PageNumber);
             return result;
         }
+        public List<Restaurant> GetRestaurantsByOwner()
+        {
+            var userId = _userContextService.GetUserId;
+
+            var restaurants = _dbContext.Restaurants
+                .Where(r => r.CreatedById == userId)
+                .ToList();
+
+            return restaurants;
+        }
+
 
         public int Create(CreateRestaurantDto dto)
         {
